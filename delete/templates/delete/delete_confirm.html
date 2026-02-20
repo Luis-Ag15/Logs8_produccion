@@ -1,0 +1,81 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Eliminar Cuenta{% endblock %}
+
+{% block content %}
+<main role="main">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card border-danger shadow-sm">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="mb-0">Eliminar Cuenta</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="card-text">
+                            Estás a punto de eliminar tu cuenta permanentemente.
+                            Esta acción <strong>NO se puede deshacer</strong>.
+                            Se borrarán todos tus datos, incluyendo el registro de Paciente asociado.
+                        </p>
+
+                        <!-- Mostrar apellido como referencia -->
+                        <p class="alert alert-warning">
+                            Para confirmar, ingresa tu <strong>contraseña</strong> y el
+                            <strong>ID QR: </strong><strong>{{ request.user.last_name }}</strong>.
+                        </p>
+
+                        <form method="post">
+                            {% csrf_token %}
+
+                            {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <ul class="mb-0 pl-3">
+                                    {% for field in form %}
+                                    {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                    {% endfor %}
+                                    {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            <!-- Contraseña -->
+                            <div class="form-group mb-3">
+                                {{ form.password.label_tag }}
+                                {{ form.password }}
+                                <small class="form-text text-muted">
+                                    Por seguridad, debes confirmar tu contraseña actual.
+                                </small>
+                            </div>
+
+                            <!-- ID QR -->
+                            <div class="form-group mb-4">
+                                {{ form.qr_id.label_tag }}
+                                {{ form.qr_id }}
+                                <small class="form-text text-muted">
+                                    Escribe manualmente tu ID asociado a tu cuenta.
+                                </small>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'profile' %}" class="btn btn-secondary">
+                                    Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-danger">
+                                    Confirmar eliminación permanente
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,361 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Registro Unificado{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <div class="card-header bg-success bg-gradient text-white p-4 border-0">
+                    <h3 class="card-title mb-0"><i class="fas fa-users-cog me-2"></i> Registro Unificado</h3>
+                    <small class="opacity-75">Cree una cuenta de usuario y registre los resultados del paciente en un solo paso.</small>
+                </div>
+
+                <div class="card-body p-0"> 
+                    <div id="django-messages" class="px-4 pt-3">
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'success' }} alert-dismissible fade show shadow-sm" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% if user_form.errors or paciente_form.errors %}
+                        <div class="alert alert-danger shadow-sm alert-errors mx-2">
+                            <i class="fas fa-exclamation-triangle me-2"></i> <strong>Error:</strong> Por favor revise los campos marcados.
+                            {% if user_form.non_field_errors %}
+                                <div class="mt-2">{{ user_form.non_field_errors }}</div>
+                            {% endif %}
+                            {% if paciente_form.non_field_errors %}
+                                <div class="mt-2">{{ paciente_form.non_field_errors }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <form id="formUnificado" method="post" enctype="multipart/form-data" class="p-4">
+                        {% csrf_token %}
+
+                        <!-- SECCIÓN 1 -->
+                        <div class="section-frame mb-4">
+                            <h5 class="section-title">
+                                <i class="fas fa-user-plus me-2"></i> Credenciales de Usuario
+                            </h5>
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ user_form.last_name.label }}</label>
+                                    <div class="input-group">
+                                        {{ user_form.last_name }}
+                                        <button class="btn btn-dark" type="button" onclick="copiarCodigo()" title="Copiar código">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div id="copyMsg" class="badge bg-success mt-1 d-none animated fadeIn">¡Código copiado!</div>
+                                    {% if user_form.last_name.errors %}<div class="text-danger small">{{ user_form.last_name.errors }}</div>{% endif %}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ user_form.username.label }}</label>
+                                    {{ user_form.username }}
+                                    {% if user_form.username.errors %}<div class="text-danger small">{{ user_form.username.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ user_form.email.label }}</label>
+                                    {{ user_form.email }}
+                                    {% if user_form.email.errors %}<div class="text-danger small">{{ user_form.email.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ user_form.first_name.label }}</label>
+                                    {{ user_form.first_name }}
+                                    {% if user_form.first_name.errors %}<div class="text-danger small">{{ user_form.first_name.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ user_form.password1.label }}</label>
+                                    {{ user_form.password1 }}
+                                    {% if user_form.password1.errors %}<div class="text-danger small">{{ user_form.password1.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ user_form.password2.label }}</label>
+                                    {{ user_form.password2 }}
+                                    {% if user_form.password2.errors %}<div class="text-danger small">{{ user_form.password2.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 2 -->
+                        <div class="section-frame mb-4">
+                            <h5 class="section-title">
+                                <i class="fas fa-id-card me-2"></i>Información del Paciente
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.id.label }}</label>
+                                    {{ paciente_form.id }}
+                                    {% if paciente_form.id.errors %}<div class="text-danger small">{{ paciente_form.id.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.nombre.label }}</label>
+                                    {{ paciente_form.nombre }}
+                                    {% if paciente_form.nombre.errors %}<div class="text-danger small">{{ paciente_form.nombre.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.edad.label }}</label>
+                                    {{ paciente_form.edad }}
+                                    {% if paciente_form.edad.errors %}<div class="text-danger small">{{ paciente_form.edad.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.sexo.label }}</label>
+                                    {{ paciente_form.sexo }}
+                                    {% if paciente_form.sexo.errors %}<div class="text-danger small">{{ paciente_form.sexo.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.telefono.label }}</label>
+                                    {{ paciente_form.telefono }}
+                                    {% if paciente_form.telefono.errors %}<div class="text-danger small">{{ paciente_form.telefono.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECCIÓN 3 -->
+                        <div class="section-frame mb-4">
+                            <h5 class="section-title">
+                                <i class="fas fa-file-medical-alt me-2"></i>Detalles Clínicos
+                            </h5>
+                            <div class="row g-3">
+
+                                {% if paciente_form.fecha_de_registro %}
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.fecha_de_registro.label }}</label>
+                                    {{ paciente_form.fecha_de_registro }}
+                                </div>
+                                {% endif %}
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.datos_medico.label }}</label>
+                                    {{ paciente_form.datos_medico }}
+                                    {% if paciente_form.datos_medico.errors %}<div class="text-danger small">{{ paciente_form.datos_medico.errors }}</div>{% endif %}
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.informacion_clinica.label }}</label>
+                                    {{ paciente_form.informacion_clinica }}
+                                    {% if paciente_form.informacion_clinica.errors %}<div class="text-danger small">{{ paciente_form.informacion_clinica.errors }}</div>{% endif %}
+                                </div>
+
+                                <!-- ✅ AQUÍ SOLO SE QUITÓ EL DIV EXTRA -->
+                                <div class="col-12">
+                                    <label class="form-label fw-bold small text-uppercase text-muted">{{ paciente_form.resultado_prueba.label }}</label>
+                                    {{ paciente_form.resultado_prueba }}
+                                    {% if paciente_form.resultado_prueba.errors %}<div class="text-danger small">{{ paciente_form.resultado_prueba.errors }}</div>{% endif %}
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- =========================
+                             SECCIÓN 4: DOCUMENTACIÓN VISUAL
+                             ========================= -->
+                        <div class="section-frame mb-5">
+                            <h5 class="section-title">
+                                <i class="fas fa-camera me-2"></i>Documentación Visual
+                            </h5>
+                            <div class="row g-4">
+                                <div class="col-md-6 text-center border-md-end">
+                                    <label class="form-label fw-bold d-block text-muted">{{ paciente_form.foto_perfil.label }}</label>
+                                    <div class="preview-box bg-white rounded mb-3">
+                                        <img id="preview_foto_perfil" src="" class="img-fluid rounded d-none" style="height: 200px; width: 100%; object-fit: cover;">
+                                        <div id="placeholder_perfil" class="py-5 text-secondary opacity-50">
+                                            <i class="fas fa-user-circle fa-4x"></i>
+                                            <p class="mt-2 small">Vista previa de perfil</p>
+                                        </div>
+                                    </div>
+                                    {{ paciente_form.foto_perfil }}
+                                    {% if paciente_form.foto_perfil.errors %}<div class="text-danger small">{{ paciente_form.foto_perfil.errors }}</div>{% endif %}
+                                </div>
+                                <div class="col-md-6 text-center mt-4 mt-md-0">
+                                    <label class="form-label fw-bold d-block text-muted">{{ paciente_form.foto_resultado.label }}</label>
+                                    <div class="preview-box bg-white rounded mb-3">
+                                        <img id="preview_foto_resultado" src="" class="img-fluid rounded d-none" style="height: 200px; width: 100%; object-fit: cover;">
+                                        <div id="placeholder_resultado" class="py-5 text-secondary opacity-50">
+                                            <i class="fas fa-file-invoice fa-4x"></i>
+                                            <p class="mt-2 small">Vista previa de prueba</p>
+                                        </div>
+                                    </div>
+                                    {{ paciente_form.foto_resultado }}
+                                    {% if paciente_form.foto_resultado.errors %}<div class="text-danger small">{{ paciente_form.foto_resultado.errors }}</div>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg px-5 py-3 shadow order-1 order-md-0">
+                                <i class="fas fa-check-double me-2"></i>Registrar Todo
+                            </button>
+
+                            <button type="button" class="btn btn-outline-dark btn-lg px-5 py-3 order-0 order-md-1" id="btnLimpiar">
+                                <i class="fas fa-trash-alt me-2"></i>Borrar Formulario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilo unificado y consolidado de Marcos */
+    .section-frame {
+        background-color: #fcfcfc;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .section-title {
+        color: #198754;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Inputs de ancho total y estilo */
+    input, select, textarea {
+        display: block;
+        width: 100% !important;
+        padding: 0.75rem;
+        font-size: 1rem;
+        color: #333;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: #198754;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.1);
+        background-color: #f8fff9;
+    }
+
+    .preview-box {
+        border: 2px dashed #ddd;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (min-width: 768px) {
+        .btn-lg { min-width: 280px; }
+    }
+    
+    .animated { animation-duration: 0.5s; animation-fill-mode: both; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fadeIn { animation-name: fadeIn; }
+</style>
+
+<script>
+    /* Copiar código mejorado (de signup.html) */
+    function copiarCodigo() {
+        // En este template el código está en user_prefix-last_name? 
+        // El id es 'codigo' según el widget del form original, pero con prefix Django genera id_user-last_name
+        // Vamos a buscar el input por su ID si se conserva, o por name.
+        // En UserCreationFormWithEmail, el widget tiene id='codigo'. 
+        // Django con prefix suele cambiar el ID a id_prefix-fieldname.
+        // Vamos a intentar buscar el input genéricamente.
+        
+        // Buscamos el input que contenga 'codigo' en su id o el name user-last_name
+        const input = document.querySelector('input[name="user-last_name"]');
+        const msg = document.getElementById("copyMsg");
+
+        if (!input || !input.value) {
+            alert("No hay código para copiar");
+            return;
+        }
+
+        navigator.clipboard.writeText(input.value).then(() => {
+            msg.classList.remove("d-none");
+            setTimeout(() => msg.classList.add("d-none"), 2500);
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("formUnificado");
+        const btnLimpiar = document.getElementById("btnLimpiar");
+
+        // 1. Lógica de preview de imágenes (de paciente_form.html)
+        function mostrarPreview(input, previewId, placeholderId) {
+            const preview = document.getElementById(previewId);
+            const placeholder = document.getElementById(placeholderId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove("d-none");
+                    placeholder.classList.add("d-none");
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        const inputPerfil = document.querySelector('input[name="paciente-foto_perfil"]');
+        const inputResultado = document.querySelector('input[name="paciente-foto_resultado"]');
+
+        if (inputPerfil) inputPerfil.addEventListener("change", () => mostrarPreview(inputPerfil, "preview_foto_perfil", "placeholder_perfil"));
+        if (inputResultado) inputResultado.addEventListener("change", () => mostrarPreview(inputResultado, "preview_foto_resultado", "placeholder_resultado"));
+
+
+        // 2. Lógica de minúsculas en username/email (de signup.html)
+        const usernameInput = document.querySelector('input[name="user-username"]');
+        const emailInput = document.querySelector('input[name="user-email"]');
+
+        [usernameInput, emailInput].forEach(el => {
+            if (el) {
+                el.addEventListener("input", function () {
+                    this.value = this.value.toLowerCase().replace(/\s/g, '');
+                });
+            }
+        });
+
+        // 3. Botón Limpiar
+        btnLimpiar.addEventListener("click", function () {
+            if (confirm("¿Seguro que deseas borrar todo el progreso?")) {
+                form.reset();
+                
+                // Limpiar previews
+                ["preview_foto_perfil", "preview_foto_resultado"].forEach(id => {
+                    const img = document.getElementById(id);
+                    if(img) {
+                        img.src = "";
+                        img.classList.add("d-none");
+                    }
+                });
+                ["placeholder_perfil", "placeholder_resultado"].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.classList.remove("d-none");
+                });
+
+                document.querySelectorAll('.alert').forEach(a => a.remove());
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    });
+</script>
+{% endblock %}
